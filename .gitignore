@@ -1,0 +1,45 @@
+# Node.js files
+node_modules/
+npm-shrinkwrap.json
+
+# Build artifacts
+build/
+dist/
+.compiled/
+
+# Editor preferences and temporary files
+.idea/
+.vscode/
+*.swo
+
+# Testing frameworks
+jest/
+coverage/
+
+# Logs and temporary data
+logs/
+tmp/
+
+# Environment specific configurations
+.env
+
+# Database files (if applicable)
+.sql
+*.db
+
+# IDE specific files
+*.iml
+
+# Markdown live preview data
+*.md.meta
+
+# Compiled TypeScript files
+*.js
+*.d.ts
+
+# Dependency lock files (alternative to package-lock.json)
+yarn.lock
+package-lock.json
+
+# Editor config files
+.editorconfig
