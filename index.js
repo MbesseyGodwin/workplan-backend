@@ -3,6 +3,8 @@
 const express = require("express");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
+const dotenv = require("dotenv");
+// var nodemailer = require('nodemailer');
 
 // Import the router directly
 const router = require("./routes");
@@ -11,7 +13,7 @@ dotenv.config();
 
 const app = express();
 
-// app.use(cors({ credentials: true, origin: process.env.CORS_ORIGIN }));
+app.use(cors({ credentials: true, origin: process.env.CORS_ORIGIN }));
 
 // Allow requests from http://localhost:3000
 app.use(
