@@ -16,21 +16,28 @@ const app = express();
 // Allow requests from http://localhost:3000
 app.use(
   cors({
-    origin: "http://localhost:3000",
+    origin: ["http://localhost:3000", "*"],
     credentials: true,
   })
 );
 
-// API Routes
+// home API Routes
 app.get("/", (req, res) => {
   res.json({
-    message: `API Routes`,
-    links: [
-      "/api/names",
-      // "/api/reports",
-    ]
+    name: `Workplan Manager`,
+    version: `1.0.0`,
+    description: `Workplan Manager is a web application for managing workplans efficiently.`,
+    authors: ['mbessey godwin', 'ezeobi onyedikachi', 'samuel uzochukwu', 'nelson attah', 'thelma abba'],
+    email: `caritasnigeriaworkplan@gmail.com`,
+    website: `https://example.com`,
+    language: `Node.js`,
+    database: `MySQL`,
+    frontend: `React.js`,
+    backend: `Node.js (Express)`,
+    repository: `https://github.com/MbesseyGodwin`,
   });
 });
+
 
 app.use(cookieParser());
 app.use(express.json());
