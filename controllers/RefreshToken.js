@@ -29,7 +29,7 @@ const refreshToken = (req, res) => {
 
             // If refresh token is valid, generate a new access token
             const { user_id: userID, first_name: fName, last_name: lName, email, role_id: roleID, unit: user_unit } = result[0];
-            const accessToken = jwt.sign({ userID, fName, lName, email, roleID, user_unit }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '15s' });
+            const accessToken = jwt.sign({ userID, fName, lName, email, roleID, user_unit }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '60s' });
 
             // Send the new access token in the response
             res.json({ accessToken });
