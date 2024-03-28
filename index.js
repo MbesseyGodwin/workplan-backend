@@ -13,8 +13,6 @@ dotenv.config();
 
 const app = express();
 
-// app.use(cors({ credentials: true, origin: process.env.CORS_ORIGIN }));
-
 // Allow requests from http://localhost:3000
 app.use(
   cors({
@@ -23,11 +21,22 @@ app.use(
   })
 );
 
+// API Routes
+app.get("/", (req, res) => {
+  res.json({
+    message: `API Routes`,
+    links: [
+      "/api/names",
+      // "/api/reports",
+    ]
+  });
+});
+
 app.use(cookieParser());
 app.use(express.json());
 
 // Routes
 app.use(router);
 
-const port = process.env.PORT || 4000;
+const port = process.env.PORT || 5001;
 app.listen(port, () => console.log(`Server running on port ${port}`));
