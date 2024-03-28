@@ -1,42 +1,45 @@
+// ../controllers/RefreshToken.js
+
 const jwt = require('jsonwebtoken');
 const { connection } = require('../config/Database');
 
 const refreshToken = (req, res) => {
   try {
+    // Extract the refresh token from the request cookies
     const refreshToken = req.cookies.refreshToken;
 
-    if (!refreshToken) {
-      return res.status(401).json({ error: 'Refresh token not provided' });
-    }
+    // If no refresh token is present, return 401 Unauthorized status
+    if (!refreshToken) return res.sendStatus(401);
 
-    connection.query('SELECT * FROM User WHERE refresh_token = ?', [refreshToken], async (error, results) => {
-      if (error) {
-        console.error('Database error:', error);
-        return res.status(500).json({ error: 'Internal server error' });
-      }
+    // Query the database to find the user associated with the refresh token
+    connection.query(
+      `SELECT user_id, first_name, last_name, email, role_id, unit FROM User WHERE refresh_token = ?`,
+      [refreshToken],
+      (error, result) => {
+        if (error) {
+          console.log('Error:', error);
+          return res.sendStatus(500);
+        } else {
+          // If no user is found with the refresh token, return 403 Forbidden status
+          if (!result[0]) return res.sendStatus(403);
 
-      if (!results[0]) {
-        return res.status(403).json({ error: 'Invalid refresh token' });
-      }
+          // Verify the refresh token and decode its payload
+          jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err, decoded) => {
+            if (err) return res.sendStatus(403);
 
-      try {
-        const { user_id, first_name, last_name, email, role_id, unit } = results[0];
-        jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err, decoded) => {
-          if (err) {
-            console.error('Token verification error:', err);
-            return res.status(403).json({ error: 'Invalid refresh token' });
-          }
-          const accessToken = jwt.sign({ user_id, first_name, last_name, email, role_id, unit }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '15m' });
-          res.json({ accessToken });
-        });
-      } catch (err) {
-        console.error('Error generating access token:', err);
-        res.status(500).json({ error: 'Internal server error' });
+            // If refresh token is valid, generate a new access token
+            const { user_id: userID, first_name: fName, last_name: lName, email, role_id: roleID, unit: user_unit } = result[0];
+            const accessToken = jwt.sign({ userID, fName, lName, email, roleID, user_unit }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '15s' });
+
+            // Send the new access token in the response
+            res.json({ accessToken });
+          });
+        }
       }
-    });
+    );
   } catch (error) {
-    console.error('Error:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    console.log('Error:', error);
+    res.sendStatus(500);
   }
 };
 
