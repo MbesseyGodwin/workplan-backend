@@ -45,5 +45,5 @@ app.use(express.json());
 // Routes
 app.use(router);
 
-const port = process.env.PORT || 5001;
+const port = process.env.PORT || 1000;
 app.listen(port, () => console.log(`Server running on port ${port}`));
