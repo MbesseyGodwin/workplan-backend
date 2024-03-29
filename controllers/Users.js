@@ -74,7 +74,7 @@ const loginUser = (req, res) => {
         const { user_id: userID, role_id: roleID, first_name: fName, last_name: lName, email } = result[0];
 
         // Generate an access token and a refresh token for the user
-        const accessToken = jwt.sign({ userID, fName, lName, email, roleID }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '60s' });
+        const accessToken = jwt.sign({ userID, fName, lName, email, roleID }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1d' });
         const refreshToken = jwt.sign({ userID, fName, lName, email, roleID }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '1d' });
 
         // Update the user's refresh token in the database
