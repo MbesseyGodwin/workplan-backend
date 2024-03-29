@@ -11,7 +11,9 @@ const { createWorkplan, editWorkplan, deleteWorkplan, getAllWorkplans, getWorkpl
 const router = express.Router();
 
 // Define routes with associated controller functions and middleware
-router.get('/users', verifyToken, getUsers); // Route to fetch users, protected with JWT verification middleware
+// router.get('/users', verifyToken, getUsers); // Route to fetch users, protected with JWT verification middleware
+
+router.get('/users', getUsers); // Route to fetch users, protected with JWT verification middleware
 router.post('/signup', signupUser); // Route to handle user signup
 router.put('/login', loginUser); // Route to handle user login
 router.get('/token', refreshToken); // Route to refresh JWT token
