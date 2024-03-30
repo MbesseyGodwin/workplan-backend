@@ -46,7 +46,7 @@ const signupUser = (req, res) => {
 
 
 // Log in an existing user
-// Log in an existing user
+// API Log in an existing user
 const loginUser = (req, res) => {
   try {
     const { email, password } = req.body;
@@ -81,7 +81,14 @@ const loginUser = (req, res) => {
         connection.query(`UPDATE User SET refresh_token = "${refreshToken}" WHERE user_id = ${userID}`);
 
         // Set the refresh token in a cookie with HttpOnly and Max-Age options
-        res.cookie('refreshToken', refreshToken, { httpOnly: true, maxAge: 24 * 60 * 60 * 1000 });
+        // res.cookie('refreshToken', refreshToken, { httpOnly: true, maxAge: 24 * 60 * 60 * 1000 });
+        // res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: true, maxAge: 24 * 60 * 60 * 1000 });
+
+        const expirationDate = new Date();
+expirationDate.setFullYear(expirationDate.getFullYear() + 1); // Set expiration to 1 year from now
+res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: true, expires: expirationDate });
+
+
 
         // Send the access token in the response
         res.status(200).json({ accessToken });

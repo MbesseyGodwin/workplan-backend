@@ -31,7 +31,7 @@ const refreshToken = (req, res) => {
             const { user_id: userID, first_name: fName, last_name: lName, email, role_id: roleID, unit: user_unit } = result[0];
             const accessToken = jwt.sign({ userID, fName, lName, email, roleID, user_unit }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1d' });
 
-            // Send the new access token in the reshttps://frontend-workplan.onrender.com/dashboardponse
+            // Send the new access token 
             res.json({ accessToken });
           });
         }
