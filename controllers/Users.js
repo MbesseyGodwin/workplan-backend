@@ -71,11 +71,11 @@ const loginUser = (req, res) => {
         }
 
         // Extract user information from the query result
-        const { user_id: userID, role_id: roleID, first_name: fName, last_name: lName, email } = result[0];
+        const { user_id: userID, role_id: roleID, first_name: fName, last_name: lName, email, unit: user_unit } = result[0];
 
         // Generate an access token and a refresh token for the user
-        const accessToken = jwt.sign({ userID, fName, lName, email, roleID }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1d' });
-        const refreshToken = jwt.sign({ userID, fName, lName, email, roleID }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '1d' });
+        const accessToken = jwt.sign({ userID, fName, lName, email, roleID, user_unit }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1d' });
+        const refreshToken = jwt.sign({ userID, fName, lName, email, roleID, user_unit }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '1d' });
 
         // Update the user's refresh token in the database
         connection.query(`UPDATE User SET refresh_token = "${refreshToken}" WHERE user_id = ${userID}`);
@@ -85,8 +85,8 @@ const loginUser = (req, res) => {
         // res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: true, maxAge: 24 * 60 * 60 * 1000 });
 
         const expirationDate = new Date();
-expirationDate.setFullYear(expirationDate.getFullYear() + 1); // Set expiration to 1 year from now
-res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: true, expires: expirationDate });
+        expirationDate.setFullYear(expirationDate.getFullYear() + 1); // Set expiration to 1 year from now
+        res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: true, expires: expirationDate });
 
 
 

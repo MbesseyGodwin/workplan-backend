@@ -6,6 +6,15 @@ const cors = require("cors");
 const dotenv = require("dotenv");
 // var nodemailer = require('nodemailer');
 
+
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
+
+
+const upload = multer({ dest: 'uploads/' });
+
+
 // Import the router directly
 const router = require("./routes");
 
@@ -16,7 +25,7 @@ const app = express();
 // Allow requests from http://localhost:3000
 app.use(
   cors({
-    origin: ["http://localhost:3000", "*", "https://frontend-workplan.onrender.com"],
+    origin: ["http://localhost:3000", "*", "https://frontend-workplan.onrender.com", "http://192.168.94.29:3000"],
     credentials: true,
   })
 );
@@ -36,6 +45,25 @@ app.get("/", (req, res) => {
     backend: `Node.js (Express)`,
     repository: `https://github.com/MbesseyGodwin`,
   });
+});
+
+// Route to download a file
+app.get('/download/:filename', (req, res) => {
+  const filename = req.params.filename;
+  const filePath = path.join(__dirname, 'uploads', filename);
+
+  // Check if the file exists
+  if (fs.existsSync(filePath)) {
+      // Set headers for file download
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+      res.setHeader('Content-Type', 'application/pdf');
+
+      // Stream the file to the response
+      const fileStream = fs.createReadStream(filePath);
+      fileStream.pipe(res);
+  } else {
+      res.status(404).send('File not found');
+  }
 });
 
 

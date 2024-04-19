@@ -38,17 +38,18 @@ const sendEmailInBackground = async ({ to, subject, text }) => {
 // Route for creating a new workplan
 const createWorkplan = (req, res) => {
   try {
-    const { title, description, status, user_id, workplan_type, workplan_day, workplan_date, vehicleId, destination, location, departure_time, logistic, implementingTeam, authorizer, user_unit } = req.body;
+    const { title, description, status, user_id, workplan_type, workplan_day, workplan_date, vehicleId, destination, location, departure_time, logistic, implementingTeam, authorizer, user_unit, workplan_week, workplan_quarter } = req.body;
 
     console.log(implementingTeam);
+    console.log(user_unit);
 
 
     // Insert the new workplan data into the database
     connection.query(`set foreign_key_checks = 0;`);
     connection.query(`
-      INSERT INTO Workplan (title, description, status, user_id, workplan_type, workplan_day, workplan_date, vehicle_id, destination, location, departure_time, logistic, authorizer, user_unit)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [title, description, status, user_id, workplan_type, workplan_day, workplan_date, vehicleId, destination, location, departure_time, logistic, authorizer, user_unit], (error, results, fields) => {
+      INSERT INTO Workplan (title, description, status, user_id, workplan_type, workplan_day, workplan_date, vehicle_id, destination, location, departure_time, logistic, authorizer, user_unit, workplan_week, workplan_quarter)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [title, description, status, user_id, workplan_type, workplan_day, workplan_date, vehicleId, destination, location, departure_time, logistic, authorizer, user_unit, workplan_week, workplan_quarter], (error, results, fields) => {
         if (error) {
           console.error('Error creating workplan:', error);
           return res.status(500).json({ error: 'Internal Server Error' });
@@ -294,7 +295,7 @@ const approveWorkplanByUserId = async (req, res) => {
   const currentDate = new Date().toISOString().slice(0, 19).replace('T', ' '); // Get current date and time
 
   const sqlQuery = `UPDATE Workplan SET status = "Approved", authorizer = 43, approval_date = ? WHERE Workplan_id = ?`;
-  
+
   // Query the database to update the status of pending workplans
   connection.query(sqlQuery, [currentDate, Workplan_id], async (error, results, fields) => {
     if (error) {
@@ -353,7 +354,9 @@ const approveWorkplanForVehicleAssignment = (req, res) => {
 // francis agim in admin will assign, it puts the names of vehicle and pilot for each   
 // Function to allocate workplans for vehicle assignment
 const allocateVehicleAndPilot = (req, res) => {
+
   const { Workplan_id, vehicle_name, pilot_name } = req.body;
+
   const currentDate = new Date().toISOString().slice(0, 19).replace('T', ' '); // Get current date and time
 
   const authorizerId = 56; // Set the authorizer ID
@@ -440,7 +443,7 @@ const getWorkplansByAuthorizerCollate = (req, res) => {
 
     // Fetch workplans with the specified authorizer ID from the database
     connection.query(
-      `SELECT * FROM Workplan where authorizer = ? AND user_unit != '' AND user_unit != 'NULL';`,
+      `SELECT CONCAT(User.first_name, ' ', User.last_name) AS full_name, Workplan.* FROM Workplan JOIN User ON Workplan.user_id = User.user_id WHERE Workplan.authorizer = ? AND Workplan.user_unit != '' AND Workplan.user_unit != 'NULL';`,
       [authorizerId],
       (error, results) => {
         if (error) {
@@ -465,13 +468,16 @@ const getWorkplansByAuthorizerCollate = (req, res) => {
 
 
 
+
+
 // Function to get all workplans with a specific authorizer ID, this API is for dr nnadi, it get all the workplans sent to him
 const getAllApprovedStateWorkplanForTheWeek = (req, res) => {
   try {
     const authorizerId = 56; // Set the authorizer ID
 
     // Fetch workplans with the specified authorizer ID from the database
-    connection.query(`SELECT * FROM Workplan WHERE authorizer = ? AND (user_unit IS NOT NULL AND TRIM(user_unit) != '') AND (vehicle_name IS NOT NULL OR TRIM(vehicle_name) != '') AND (pilot_name IS NOT NULL OR TRIM(pilot_name) != '');`,
+    connection.query(`SELECT CONCAT(User.first_name, ' ', User.last_name) AS full_name, Workplan.* FROM Workplan JOIN User ON Workplan.user_id = User.user_id WHERE authorizer = ?  AND (user_unit IS NOT NULL AND TRIM(user_unit) != '')  AND (vehicle_name IS NOT NULL OR TRIM(vehicle_name) != '')  AND (pilot_name IS NOT NULL OR TRIM(pilot_name) != '');`,
+
       [authorizerId],
       (error, results) => {
         if (error) {
@@ -512,7 +518,34 @@ const getWorkplansByAuthorizerAllocate = (req, res) => {
 
     // Fetch workplans with the specified authorizer ID from the database
     connection.query(
-      `SELECT * FROM Workplan WHERE authorizer = ? AND (user_unit IS NOT NULL AND TRIM(user_unit) != '') AND (vehicle_name IS NULL OR TRIM(vehicle_name) = '') AND (pilot_name IS NULL OR TRIM(pilot_name) = '');`,
+      `
+      SELECT
+      LOWER(CONCAT(u.first_name, ' ', u.last_name)) AS "requested by",
+      w.workplan_id,
+      w.user_id,
+      w.workplan_type,
+      w.workplan_day,
+      DATE_FORMAT(w.workplan_date, '%Y-%m-%d') AS date,
+      w.destination,
+      w.location,
+      DATE_FORMAT(w.departure_time, '%H:%i') AS time,
+      w.logistic,
+      w.assigned_pilot_id,
+      w.implementing_team_id,
+      w.authorizer,
+      w.user_unit,
+      w.vehicle_name,
+      w.pilot_name
+      FROM
+      Workplan w
+      JOIN
+      User u ON w.user_id = u.user_id
+      WHERE
+      w.authorizer = ?
+      AND (w.user_unit IS NOT NULL AND TRIM(w.user_unit) != '')
+      AND (w.vehicle_name IS NULL OR TRIM(w.vehicle_name) = '')
+      AND (w.pilot_name IS NULL OR TRIM(w.pilot_name) = '')
+      `,
       [authorizerId],
       (error, results) => {
         if (error) {
@@ -534,6 +567,7 @@ const getWorkplansByAuthorizerAllocate = (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
+
 
 
 // Export the controller functions

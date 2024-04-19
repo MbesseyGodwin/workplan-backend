@@ -9,10 +9,10 @@ dotenv.config();
 
 // Database configuration object to hosted database
 const config = {
-  host: process.env.REMOTE_MYSQL_HOST,
-  user: process.env.REMOTE_MYSQL_USERNAME,
-  password: process.env.REMOTE_MYSQL_PASSWORD,
-  database: process.env.REMOTE_MYSQL_DB_NAME
+  host: process.env.LOCAL_MYSQL_HOST,
+  user: process.env.LOCAL_MYSQL_USERNAME,
+  password: process.env.LOCAL_MYSQL_PASSWORD,
+  database: process.env.LOCAL_MYSQL_DB_NAME
 };
 
 
